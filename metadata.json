@@ -1,0 +1,8 @@
+{
+  "name": "GeminiVault Journal",
+  "description": "A secure personal AI journal with multi-turn Gemini conversations, automatic session summarization, and strict user-isolated Cloud Firestore storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
