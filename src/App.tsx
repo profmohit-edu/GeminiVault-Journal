@@ -395,6 +395,7 @@ export default function App() {
         onClose={() => setIsSecurityModalOpen(false)}
         uid={currentUser.uid}
         email={currentUser.email}
+        isAnonymous={currentUser.isAnonymous}
       />
     </div>
   );

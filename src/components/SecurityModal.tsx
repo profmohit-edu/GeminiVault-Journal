@@ -8,9 +8,10 @@ interface SecurityModalProps {
   onClose: () => void;
   uid: string;
   email?: string | null;
+  isAnonymous?: boolean;
 }
 
-export function SecurityModal({ isOpen, onClose, uid, email }: SecurityModalProps) {
+export function SecurityModal({ isOpen, onClose, uid, email, isAnonymous = false }: SecurityModalProps) {
   const [serverInfo, setServerInfo] = useState<SecurityStatusInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +103,7 @@ export function SecurityModal({ isOpen, onClose, uid, email }: SecurityModalProp
               </div>
               <div className="p-2.5 rounded-lg bg-stone-900/80 border border-stone-800">
                 <span className="text-stone-400 block text-[11px] mb-0.5">Email Identity:</span>
-                <span className="text-stone-200">{email || 'Authenticated via Google Identity'}</span>
+                <span className="text-stone-200">{isAnonymous ? 'Anonymous Firebase identity' : (email || 'Authenticated via Google Identity')}</span>
               </div>
             </div>
           </div>
