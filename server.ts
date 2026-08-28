@@ -6,6 +6,7 @@ import { GoogleGenAI } from '@google/genai';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { Firestore } from '@google-cloud/firestore';
 import firebaseConfig from './firebase-applet-config.json' with { type: 'json' };
+import { extractVerifiedIdentity } from './src/lib/authPolicy';
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -89,6 +90,7 @@ export interface AuthenticatedRequest extends Request {
   user?: {
     uid: string;
     email?: string;
+    authenticationMethod?: 'anonymous' | 'google' | 'firebase';
   };
   idToken?: string;
 }
@@ -138,16 +140,17 @@ async function authenticateFirebaseToken(
       return;
     }
 
-    const data = await verifyRes.json() as { users?: Array<{ localId: string; email?: string }> };
-    if (!data.users || data.users.length === 0 || !data.users[0].localId) {
+    const data = await verifyRes.json() as { users?: Array<{ localId?: string; email?: string; providerUserInfo?: Array<{ providerId?: string }> }> };
+    const verifiedUser = extractVerifiedIdentity(data.users);
+    if (!verifiedUser) {
       res.status(401).json({ error: 'Unauthorized: Could not determine verified user identity.' });
       return;
     }
 
-    const verifiedUser = data.users[0];
     req.user = {
-      uid: verifiedUser.localId,
+      uid: verifiedUser.uid,
       email: verifiedUser.email,
+      authenticationMethod: verifiedUser.authenticationMethod,
     };
 
     next();

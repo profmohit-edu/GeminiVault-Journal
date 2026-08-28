@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signInWithGoogle } from '../lib/firebase';
+import { signInWithGoogle, signInWithPrivateDemo } from '../lib/firebase';
 import { ShieldCheck, Lock, Sparkles, Key, FileCheck, Layers, ArrowRight } from 'lucide-react';
 
 interface AuthScreenProps {
@@ -8,6 +8,7 @@ interface AuthScreenProps {
 
 export function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSignIn = async () => {
@@ -21,6 +22,20 @@ export function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       setError(err?.message || 'Failed to complete Google Sign-In. Please check popups or try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePrivateDemo = async () => {
+    try {
+      setDemoLoading(true);
+      setError(null);
+      await signInWithPrivateDemo();
+      if (onAuthSuccess) onAuthSuccess();
+    } catch (err: any) {
+      console.error('Private demo sign-in error:', err);
+      setError(err?.message || 'Failed to start a private demo session. Please try again.');
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -76,7 +91,7 @@ export function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
                 id="google-signin-btn"
                 type="button"
                 onClick={handleSignIn}
-                disabled={loading}
+                disabled={loading || demoLoading}
                 className="w-full flex items-center justify-center space-x-3 py-3.5 px-6 rounded-xl bg-stone-100 text-stone-900 font-medium hover:bg-white active:scale-[0.99] transition-all duration-150 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? (
@@ -109,6 +124,31 @@ export function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
                   </>
                 )}
               </button>
+
+              <button
+                id="anonymous-signin-btn"
+                type="button"
+                onClick={handlePrivateDemo}
+                disabled={loading || demoLoading}
+                className="w-full flex items-center justify-center space-x-3 py-3.5 px-6 rounded-xl bg-amber-500/10 text-amber-200 border border-amber-500/30 font-medium hover:bg-amber-500/15 active:scale-[0.99] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {demoLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-amber-300 border-t-transparent rounded-full animate-spin" />
+                    <span>Creating private demo identity...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-5 h-5" />
+                    <span>Continue with Private Demo Session</span>
+                    <ArrowRight className="w-4 h-4 text-amber-400" />
+                  </>
+                )}
+              </button>
+
+              <p id="anonymous-session-notice" className="text-center text-xs leading-relaxed text-stone-400 px-2">
+                Private demo session: your journal data is associated with this anonymous browser identity. Clearing browser/site data may prevent you from accessing it again.
+              </p>
 
               <p className="text-center text-xs text-stone-500">
                 Protected by Firebase Authentication. No passwords stored.

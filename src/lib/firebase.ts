@@ -3,6 +3,7 @@ import {
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
+  signInAnonymously,
   signOut, 
   onAuthStateChanged,
   type User 
@@ -38,6 +39,12 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || undefi
  */
 export async function signInWithGoogle(): Promise<User> {
   const result = await signInWithPopup(auth, googleProvider);
+  return result.user;
+}
+
+/** Start a genuine Firebase anonymous session for privacy-safe demonstrations. */
+export async function signInWithPrivateDemo(): Promise<User> {
+  const result = await signInAnonymously(auth);
   return result.user;
 }
 
